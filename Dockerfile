@@ -10,7 +10,7 @@ RUN apk update && apk add supervisor python3 python3-dev postgresql-dev libffi-d
 RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /app
-COPY pyproject.toml /app/
+COPY poetry.lock pyproject.toml /app/
 
 RUN poetry install $(test $APPENV==production && echo "--no-dev") --no-interaction --no-ansi
 
