@@ -1,0 +1,28 @@
+version: '3'
+
+volumes:
+  pg_data: {}
+
+services:
+  app:
+    build: .
+    container_name: 'service_order'
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+  db:
+    image: postgres:12.2-alpine
+    ports:
+      - "15432:5432"  
+    restart: always
+    environment:
+      POSTGRES_DB: so
+      POSTGRES_USER: so_user
+      POSTGRES_PASSWORD: so_pass
+    volumes:
+      - pg_data:/var/lib/postgresql/data
