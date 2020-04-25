@@ -13,6 +13,7 @@ flask-orator = "^0.2.0"
 psycopg2 = "^2.8.5"
 python-decouple = "^3.3"
 connexion = "^2.6.0"
+cryptography = "^2.9.2"
 
 
 [tool.poetry.dev-dependencies]
