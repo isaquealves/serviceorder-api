@@ -14,9 +14,12 @@ def test_root(client):
 
 def test_users_create(client):
     user_data = {
-        'username': 'Username'
+        'username': 'Username',
+        'first_name': 'User',
+        'last_name': 'Last',
+        'email': 'mail@example.com'
     }
-    
+
     response = client.post(
         '/v1/users',
         content_type='application/json',
@@ -35,43 +38,31 @@ def test_users_create(client):
         assert 'UNIQUE constraint failed' in exc.value  # nosec
 
 
-@pytest.mark.parametrize('value, expected', (
-    ['user', 422],
-    ['john.connor', 201],
-    ['bilbo-baggins', 422],
-    ['harry_potter', 201],
-    ['peter-parker', 201],
-    ['sarum@n', 422],
-    ['super.sayajin#4', 422]
+@pytest.mark.parametrize('username, first, last, email, expected', (
+    ['user', 'User', 'Name', 'email@example.com', 422],
+    ['john.connor', 'John', 'Connor', 'john@terminat.or', 201],
+    ['bilbo-baggins', 'Bilbo', 'Baggins', 'bilbo@coun.ty', 422],
+    ['peter-parker', 'Peter', 'Parker', 'peter@dailyplan.et', 201],
+    ['sarum@n', 'Saruman', '', 'saru.man-the-white@middleearth.net', 422],
+    ['super.sayajin#4', '', '', '', 422]
 ))
-def test_create_user_invalid_username(client, value, expected):
+def test_create_user_invalid_username(
+    client,
+    username,
+    first,
+    last,
+    email,
+    expected
+):
     user_data = {
-        'username': value
+        'username': username,
+        'first_name': first,
+        'last_name': last,
+        'email': email
     }
     response = client.post(
         '/v1/users',
         content_type='application/json',
         json=json.dumps(user_data))
-    
-    assert response.status_code == expected
 
-# def test_get_auth(client):
-#     response = client.get('/v1/auth')
-#     assert response.status == '405 METHOD NOT ALLOWED'
-
-# def test_post_auth(client):
-#     login_data = {
-#         'username': 'test'
-#     }
-#     keys = ['access_token', 'refresh_token']
-#     expected = {
-#         'message' : 'Check your email for our 6 number code'
-#     }
-#     response = client.post(
-#       '/v1/auth', 
-#       content_type='application/json',
-#       data=login_data)
-
-#     assert response.status_code == 200
-#     assert response.json == expected
-
+    assert response.status_code == expected  # nosec
