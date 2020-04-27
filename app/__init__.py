@@ -2,6 +2,7 @@ from importlib import import_module
 import logging
 import connexion
 from app.providers.database import db
+from app.providers.schema import ma
 
 from app.models.user import User
 from app.models.observers.user import UserObserver
@@ -29,6 +30,7 @@ def create_app(env, config=None):
                             for k in dir(config) if not k.startswith('_')])
     app.config.update(config_dict)
     db.init_app(app)
+    ma.init_app(app)
 
     User.observe(UserObserver())
 
