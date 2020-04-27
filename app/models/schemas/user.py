@@ -4,6 +4,15 @@ from .validators import username_is_valid
 
 
 class UserSchema(ma.Schema):
-    username =  fields.Str(validate=username_is_valid)
+    """ 
+    User serialization/deserialization schema
+    """
+    class Meta:
+        ordered = True
+    
+    first_name = fields.Str(required=False)
+    last_name = fields.Str(required=False)
+    email = fields.Email(required=True)
+    username = fields.Str(required=True, validate=username_is_valid)
     public_key = fields.Str(dump_only=True)
     private_key = fields.Str(dump_only=True)
