@@ -1,7 +1,6 @@
 import json
 import pytest
 from orator.exceptions.query import QueryException
-from app.models.user import User
 
 
 def test_root(client):
@@ -15,27 +14,46 @@ def test_root(client):
 
 def test_users_create(client):
     user_data = {
-        'username': 'User'
+        'username': 'Username'
     }
+    
     response = client.post(
         '/v1/users',
         content_type='application/json',
         json=json.dumps(user_data))
-    result = json.loads(response.json)
-    count = len(User.all())
+    result = json.loads(response.json['data'])
+
     assert response.status_code == 201  # nosec
-    assert count > 0  # nosec
-    assert result['username'] == 'User'  # nosec
+    assert result['username'] == 'Username'  # nosec
     assert result['id'] == 1  # nosec
+
     with(pytest.raises(QueryException)) as exc:
         response = client.post(
             '/v1/users',
             content_type='application/json',
             json=json.dumps(user_data))
-        assert 'UNIQUE constraint failed' in exc.value
-        
-        
+        assert 'UNIQUE constraint failed' in exc.value  # nosec
 
+
+@pytest.mark.parametrize('value, expected', (
+    ['user', 422],
+    ['john.connor', 201],
+    ['bilbo-baggins', 422],
+    ['harry_potter', 201],
+    ['peter-parker', 201],
+    ['sarum@n', 422],
+    ['super.sayajin#4', 422]
+))
+def test_create_user_invalid_username(client, value, expected):
+    user_data = {
+        'username': value
+    }
+    response = client.post(
+        '/v1/users',
+        content_type='application/json',
+        json=json.dumps(user_data))
+    
+    assert response.status_code == expected
 
 # def test_get_auth(client):
 #     response = client.get('/v1/auth')
