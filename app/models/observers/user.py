@@ -6,3 +6,4 @@ class UserObserver:
         user_key = UserKeys()
         user.public_key = user_key.publick_key
         user.private_key = user_key.private_key
+
