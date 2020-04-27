@@ -9,7 +9,7 @@ class User(db.Model):
 
     __table__ = 'users'
 
-    __fillable__ = ['username']
+    __fillable__ = ['first_name', 'last_name', 'email', 'username']
     __primary_key__ = 'id'
     __guarded__ = ['id', 'public_key', 'private_key']
 
