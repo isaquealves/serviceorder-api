@@ -1,6 +1,6 @@
 from typing import AnyStr
 from app.providers.database import db
-from .observers.user import UserObserver
+
 
 class User(db.Model):
     
