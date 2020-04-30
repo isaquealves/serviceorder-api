@@ -55,6 +55,11 @@ class Development(HardCoded):
         'CELERY_RESULT_BACKEND',
         'redis://localhost:6379/1'
     )
+    CELERY_TASK_ALWAYS_EAGER = config(
+        'CELERY_TASK_ALWAYS_EAGER',
+        default='False',
+        cast=bool
+    )
     SENDGRID_API_KEY = config(
         'SENDGRID_API_KEY',
         'NOAPIKEYHERE!OKBUDDY?'
@@ -70,6 +75,7 @@ class Testing(Development):
 
     def __init__(self):
         self.ORATOR_DATABASES['default'] = 'testing'
+        self.CELERY_TASK_ALWAYS_EAGER = True
 
 
 class Production(Development):
