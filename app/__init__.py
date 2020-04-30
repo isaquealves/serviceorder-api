@@ -3,6 +3,9 @@ import logging
 import connexion
 from app.providers.database import db
 from app.providers.schema import ma
+from app.providers.celery import celery
+from app.providers.mail import sg
+from app.providers.cache import redis
 
 from app.models.user import User
 from app.models.observers.user import UserObserver
@@ -31,6 +34,9 @@ def create_app(env, config=None):
     app.config.update(config_dict)
     db.init_app(app)
     ma.init_app(app)
+    celery.init_app(app)
+    sg.init_app(app)
+    redis.init_app(app)
 
     User.observe(UserObserver())
 
