@@ -1,9 +1,12 @@
 import json
+from unittest.mock import patch
 import pytest
 from orator.exceptions.query import QueryException
+from decouple import config
 
 
-def test_root(client):
+
+def test_root(client, db):
     response = client.get('/v1/')
 
     expected = {
@@ -17,7 +20,7 @@ def test_users_create(client):
         'username': 'Username',
         'first_name': 'User',
         'last_name': 'Last',
-        'email': 'mail@example.com'
+        'email': config('ACTIVATION_EMAIL_TESTING', 'mail@example.com')
     }
 
     response = client.post(
@@ -54,15 +57,16 @@ def test_create_user_invalid_username(
     email,
     expected
 ):
-    user_data = {
-        'username': username,
-        'first_name': first,
-        'last_name': last,
-        'email': email
-    }
-    response = client.post(
-        '/v1/users',
-        content_type='application/json',
-        json=json.dumps(user_data))
+    with patch('app.api.user.send_activation_email.apply_async') as task:
+        user_data = {
+            'username': username,
+            'first_name': first,
+            'last_name': last,
+            'email': email
+        }
+        response = client.post(
+            '/v1/users',
+            content_type='application/json',
+            json=json.dumps(user_data))
 
-    assert response.status_code == expected  # nosec
+        assert response.status_code == expected  # nosec
