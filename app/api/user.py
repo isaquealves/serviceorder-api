@@ -10,6 +10,8 @@ from app.api.responses import (
     invalid_data_response,
     created_response
 )
+from app.tasks import send_activation_email
+
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.CRITICAL)
@@ -19,6 +21,7 @@ def create(body: dict):
     try:
         data = UserSchema().load(json.loads(body))
         user = User.create(data)
+        send_activation_email.apply_async((user,))
         return created_response('User', data=user.to_json())
     except ValidationError as errors:
         return invalid_data_response('User', errors=errors.messages)
@@ -29,4 +32,7 @@ def create(body: dict):
             'User',
             'Data provided is not serializable'
         )
-    
+
+
+def activate(code):
+    ...

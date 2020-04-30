@@ -1,4 +1,4 @@
-from decouple import config
+from decouple import config, Csv
 
 DATABASES_CONFIG = {
         'default': 'postgres',
@@ -12,7 +12,10 @@ DATABASES_CONFIG = {
         },
         'testing': {
             'driver': config('TESTING_DB_DRIVER', 'sqlite'),
-            'database': config('TESTING_DB', '/tmp/database-test.sqlite3')
+            'database': config(
+                'TESTING_DB',
+                '/tmp/database-test.sqlite3'  # nosec
+            )
         }
     }
 
@@ -24,7 +27,7 @@ class HardCoded:
     configuration options for Flask or its extensions goes here.
     """
     ADMINS = config(
-        'APP_ADMIN', 
+        'APP_ADMIN',
         cast=lambda v: [s.strip() for s in v.split(',')]
     )
     MAIL_EXCEPTION_THROTTLE = 24 * 60 * 60
@@ -35,14 +38,36 @@ class Development(HardCoded):
     DEBUG = config('DEBUG', True)
     TESTING = config('TESTING', False)
     SECRET_KEY = config(
-        'SECRET_KEY', 
+        'SECRET_KEY',
         '1w0u1dcH0053423x1r3m311yL4rg3S1r12g1oB3U53DH3r3'
     )
     MAIL_SERVER = config('SMTP_SERVER', 'smtp.localhost.test')
     MAIL_DEFAULT_SENDER = config('MAIL_SENDER', 'admin@demo.test')
     MAIL_SUPPRESS_SEND = config('MAIL_SUPPRESS', True)
-    REDIS_URL = config('REDIS_URL', 'redis://localhost/0')
+    REDIS_URL = config('REDIS_URL', 'redis://localhost:6379/0')
     ORATOR_DATABASES = DATABASES_CONFIG
+    CELERY_BROKER_URL = config(
+        'CELERY_BROKER_URL',
+        'redis://localhost:6379/1'
+    )
+    CELERY_ACCEPT_CONTENT = config('CELERY_ACCEPT_CONTENT', default='pickle', cast=Csv())
+    CELERY_RESULT_BACKEND = config(
+        'CELERY_RESULT_BACKEND',
+        'redis://localhost:6379/1'
+    )
+    CELERY_TASK_ALWAYS_EAGER = config(
+        'CELERY_TASK_ALWAYS_EAGER',
+        default='False',
+        cast=bool
+    )
+    SENDGRID_API_KEY = config(
+        'SENDGRID_API_KEY',
+        'NOAPIKEYHERE!OKBUDDY?'
+    )
+    SENDGRID_DEFAULT_FROM = config(
+        'SENDGRID_DEFAULT_FROM',
+        'admin@example.com'
+    )
 
 
 class Testing(Development):
@@ -50,6 +75,7 @@ class Testing(Development):
 
     def __init__(self):
         self.ORATOR_DATABASES['default'] = 'testing'
+        self.CELERY_TASK_ALWAYS_EAGER = True
 
 
 class Production(Development):
@@ -58,4 +84,3 @@ class Production(Development):
         'SECRET_KEY',
         'ud1d1pwAlEhF9RbbonJtSQQHzmbNMOmzEZ1NGULP09wgOI7dEkziTlFzp8VP2hYs'
     )
-
