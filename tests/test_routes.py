@@ -5,7 +5,6 @@ from orator.exceptions.query import QueryException
 from decouple import config
 
 
-
 def test_root(client, db):
     response = client.get('/v1/')
 
