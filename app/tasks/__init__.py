@@ -3,7 +3,7 @@ import logging
 from python_http_client.exceptions import BadRequestsError, ForbiddenError
 from app.providers.celery import celery
 from app.providers.mail import sg
-from app.helpers import sign_email
+from app.helpers import encrypt_data
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 @celery.task(serializer='pickle')
 def send_activation_email(user):
 
-    code = sign_email(user)
+    code = encrypt_data(user)
     link = f'{config("BASE_URL")}/{code}'
 
     html = f"""<h1>Welcome {user.first_name}</h1>
