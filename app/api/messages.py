@@ -9,3 +9,5 @@ INVALID_AUTHORIZATION_DATA = 'Invalid token provided'
 SUCCESSFULLY_CREATED = '{} created successfully'
 
 TYPE_REQUIRED = 'Resource should be of {} type'
+
+ACTIVATED_ACCOUNT = 'User account successfully activated'

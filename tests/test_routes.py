@@ -1,9 +1,19 @@
 import json
 from unittest.mock import patch
-import pytest
-from orator.exceptions.query import QueryException
-from decouple import config
 
+import pytest
+from decouple import config
+from orator.exceptions.query import QueryException
+
+from app.models.user import User
+from app.helpers import (
+    encrypt_data,
+    encode_user_identification,
+    decrypt,
+    decode_user_identification
+)
+
+pytest.user = None
 
 
 def test_root(client, db):
@@ -32,7 +42,7 @@ def test_users_create(client):
     assert response.status_code == 201  # nosec
     assert result['username'] == 'Username'  # nosec
     assert result['id'] == 1  # nosec
-
+    pytest.user = User.find(result['id'])
     with(pytest.raises(QueryException)) as exc:
         response = client.post(
             '/v1/users',
@@ -70,3 +80,18 @@ def test_create_user_invalid_username(
             json=json.dumps(user_data))
 
         assert response.status_code == expected  # nosec
+        assert task.called_once()
+
+def test_account_activation(client):
+    code = encrypt_data(pytest.user)
+    user_id = encode_user_identification(pytest.user.pub_key)
+    link = ''.join([
+        f'/{config("API_VERSION", "v1")}/',
+        f'users/activate/'
+    ])
+    query = {
+        'code': f'{user_id.decode()}+{code}'
+    }
+    
+    response = client.get(link, query_string=query, content_type='application/json')
+    assert response.status_code == 204
