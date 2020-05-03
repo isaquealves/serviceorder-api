@@ -46,6 +46,7 @@ def test_users_create(client):
     ['bilbo-baggins', 'Bilbo', 'Baggins', 'bilbo@coun.ty', 422],
     ['peter-parker', 'Peter', 'Parker', 'peter@dailyplan.et', 201],
     ['sarum@n', 'Saruman', '', 'saru.man-the-white@middleearth.net', 422],
+    ['john.connor', 'John', 'Connor', 'john@terminat.or', 201],
     ['super.sayajin#4', '', '', '', 422]
 ))
 def test_create_user_invalid_username(
@@ -69,3 +70,4 @@ def test_create_user_invalid_username(
             json=json.dumps(user_data))
 
         assert response.status_code == expected  # nosec
+        assert task.called_once()
