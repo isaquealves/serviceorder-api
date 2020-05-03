@@ -1,15 +1,16 @@
-import urllib
-import json
-import pytest
 import base64
-from decouple import config
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding
+import json
+import urllib
 
+import pytest
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
+from decouple import config
+
+from app.helpers import (decode_user_identification, decrypt,
+                         encode_user_identification, encrypt_data)
 from app.models.user import User
-from app.helpers import encrypt_data, decrypt, encode_user_identification, decode_user_identification
 
 pytest.key_test = ''
 
@@ -65,8 +66,8 @@ def test_encode_user_identification():
         pytest.key_test
     )[:mid_str]
 
+
 def test_decode_user_identification():
     encoded_id = encode_user_identification(pytest.key_test)
     decoded = decode_user_identification(encoded_id)
-    assert base64.urlsafe_b64decode(decoded) == pytest.key_test
-
+    assert decoded == pytest.key_test

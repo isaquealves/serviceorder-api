@@ -1,7 +1,9 @@
 from pathlib import Path
+
 import pytest
 from flask import current_app
-from orator.migrations import Migrator, DatabaseMigrationRepository
+from orator.migrations import DatabaseMigrationRepository, Migrator
+
 from app import create_app, get_config
 from app.providers.database import db as _db
 
