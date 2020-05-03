@@ -1,9 +1,9 @@
-from decouple import config
 import logging
+from decouple import config
 from python_http_client.exceptions import BadRequestsError, ForbiddenError
 from app.providers.celery import celery
 from app.providers.mail import sg
-from app.helpers import encrypt_data
+from app.helpers import encrypt_data, encode_user_identification
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +13,9 @@ logging.basicConfig(level=logging.INFO)
 def send_activation_email(user):
 
     code = encrypt_data(user)
-    link = f'{config("BASE_URL")}/{code}'
+    user_id = encode_user_identification(user.pub_key)
+    link = f'{config("BASE_URL")}/{config("API_VERSION", "v1")}/' + \
+           f'users/activate/?code={user_id.decode()}+{code}'
 
     html = f"""<h1>Welcome {user.first_name}</h1>
             <p>You just need to click link below to activate your account</p>
@@ -34,9 +36,8 @@ def send_activation_email(user):
             ),
             html=html
         )
-        print(result.body)
-        print(result.status_code)
-        print(result.headers)
+
+        LOGGER.info(link)
         return result.to_dict
     except BadRequestsError as badErr:
         LOGGER.error(badErr)
