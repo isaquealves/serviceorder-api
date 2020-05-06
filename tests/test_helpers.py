@@ -9,10 +9,14 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from decouple import config
 
 from app.helpers import (decode_user_identification, decrypt,
-                         encode_user_identification, encrypt_data)
+                         encode_user_identification, encrypt_data,
+                         generate_auth_code, store_user_auth_code)
+
+from app.providers.redis import redisClient
 from app.models.user import User
 
 pytest.key_test = ''
+
 
 def test_encrypt_data(db_scope_fn):
     user_data = {
@@ -71,3 +75,13 @@ def test_decode_user_identification():
     encoded_id = encode_user_identification(pytest.key_test)
     decoded = decode_user_identification(encoded_id)
     assert decoded == pytest.key_test
+
+
+def test_generate_auth_code():
+    token = generate_auth_code()
+    assert token is not None
+
+
+def test_store_user_auth_code(client):
+    store_user_auth_code('user', generate_auth_code(), 10)
+    assert redisClient.get('user') is not None
