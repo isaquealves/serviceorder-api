@@ -40,7 +40,7 @@ def test_users_create(client):
     result = json.loads(response.json['data'])
 
     assert response.status_code == 201  # nosec
-    assert result['username'] == 'Username'  # nosec
+    assert result['username'] == 'Username'.lower()  # nosec
     assert result['id'] == 1  # nosec
     pytest.user = User.find(result['id'])
     with(pytest.raises(QueryException)) as exc:
@@ -95,3 +95,29 @@ def test_account_activation(client):
     
     response = client.get(link, query_string=query, content_type='application/json')
     assert response.status_code == 204
+
+@pytest.mark.parametrize(
+    'username, expect',
+    (
+        ['username', 'A code has been sent to your email.'],
+        [
+            config('ACTIVATION_EMAIL_TESTING', 'mail@example.com'),
+            'A code has been sent to your email.'
+        ],
+        ['test', "This user doesn't exist."],
+        ['ἰsaquealves@gmaἰl.com', "This user doesn't exist."]
+    )
+)
+def test_auth(client, username, expect):
+    data = {
+        'username': username
+    }
+    response = client.post(
+        '/v1/auth',
+        content_type='application/json',
+        json=json.dumps(data)
+    )
+
+    result = response.json
+
+    assert expect in result['message']  # nosec
