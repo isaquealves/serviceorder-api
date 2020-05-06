@@ -1,7 +1,9 @@
 from pathlib import Path
+
 import pytest
 from flask import current_app
-from orator.migrations import Migrator, DatabaseMigrationRepository
+from orator.migrations import DatabaseMigrationRepository, Migrator
+
 from app import create_app, get_config
 from app.providers.database import db as _db
 
@@ -38,17 +40,14 @@ def db(app, request):
 
 
 @pytest.fixture(scope='function')
-def session(db, app, request):
-    """ Creates a new database session for a test """
-    connection = db.engine.connect()
-    transaction = connection.begin()
-
-    options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
-
-    db.session = session
-    yield db.session
-
-    transaction.rollback()
-    connection.close()
-    session.remove()
+def db_scope_fn(app, request):
+    """ Session-wide test database """
+    migrations_path = Path(__file__).parent.parent.joinpath('migrations')
+    with app.app_context():
+        _db.init_app(current_app)
+        repo = DatabaseMigrationRepository(_db, 'migrations')
+        migrator = Migrator(repo, _db)
+        if not migrator.repository_exists():
+            repo.create_repository()
+        migrator.rollback(migrations_path)
+        migrator.run(migrations_path)

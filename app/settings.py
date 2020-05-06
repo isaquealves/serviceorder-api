@@ -45,6 +45,7 @@ class Development(HardCoded):
     MAIL_DEFAULT_SENDER = config('MAIL_SENDER', 'admin@demo.test')
     MAIL_SUPPRESS_SEND = config('MAIL_SUPPRESS', True)
     REDIS_URL = config('REDIS_URL', 'redis://localhost:6379/0')
+    REDIS_CACHE_URL = config('REDIS_CACHE_URL', 'redis://localhost:6379/2')
     ORATOR_DATABASES = DATABASES_CONFIG
     CELERY_BROKER_URL = config(
         'CELERY_BROKER_URL',
@@ -68,6 +69,10 @@ class Development(HardCoded):
         'SENDGRID_DEFAULT_FROM',
         'admin@example.com'
     )
+    AUTH_CODE_VALID_UNTIL = config(
+        'AUTH_CODE_VALID_UNTIL',
+        default=60
+    )
 
 
 class Testing(Development):
@@ -76,6 +81,7 @@ class Testing(Development):
     def __init__(self):
         self.ORATOR_DATABASES['default'] = 'testing'
         self.CELERY_TASK_ALWAYS_EAGER = True
+        self.AUTH_CODE_VALID_UNTIL = 30
 
 
 class Production(Development):

@@ -105,6 +105,19 @@ def resource_found_response(resource: str, message: str, data=None, **extras):
     return resp
 
 
+def response_ok(message: str):
+    '''
+    Responses 200 - OK
+    '''
+    response = {'status': 200, 'message': message}
+
+    resp = jsonify(response)
+
+    resp.status_code = 200
+
+    return resp
+
+
 def created_response(resource: str, data=None, **kwargs):
     '''
     Responses 201 - Created
