@@ -8,18 +8,13 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from decouple import config
 
-from app.helpers import (
-    decode_user_identification,
-    decrypt,
-    encode_user_identification,
-    encrypt_data,
-    generate_auth_code,
-    store_user_auth_code,
-)
+from app.helpers import (decode_user_identification, decrypt,
+                         encode_user_identification, encrypt_data,
+                         generate_auth_code, store_user_auth_code)
 from app.models.user import User
 from app.providers.redis import redisClient
 
-pytest.key_test = ""
+pytest.key_test = {}
 
 
 def test_encrypt_data(db_scope_fn):
@@ -59,25 +54,28 @@ def test_decrypt(db_scope_fn):
 
     user = User.create(user_data)
     cyphered = encrypt_data(user)
-    pytest.key_test = user.public_key
+    pytest.key_test = {
+        'public': user.public_key,
+        'private': user.private_key
+    }
     decrypted = json.loads(decrypt(user.private_key, cyphered))
 
     assert user.email == decrypted["email"]  # nosec
 
 
 def test_encode_user_identification():
-    encoded_id = encode_user_identification(pytest.key_test)
+    encoded_id = encode_user_identification(pytest.key_test['public'])
     mid_str = round(len(encoded_id) / 2)
     assert (
-        encoded_id[mid_str - 1 : -1]
-        == base64.urlsafe_b64encode(pytest.key_test)[:mid_str]
+        encoded_id[mid_str - 1: -1]
+        == base64.urlsafe_b64encode(pytest.key_test['public'])[:mid_str]
     )
 
 
 def test_decode_user_identification():
-    encoded_id = encode_user_identification(pytest.key_test)
+    encoded_id = encode_user_identification(pytest.key_test['public'])
     decoded = decode_user_identification(encoded_id)
-    assert decoded == pytest.key_test
+    assert decoded == pytest.key_test['public']
 
 
 def test_generate_auth_code():
