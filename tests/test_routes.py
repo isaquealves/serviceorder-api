@@ -125,13 +125,13 @@ def test_auth(client, username, expect):
 
     assert expect in result['message']  # nosec
 
+
 def test_token_emission(client):
     code = generate_auth_code()
-    uid = 1
-    store_user_auth_code(f'user-{uid}-code', code, 120)
+    uid = '1'
+    store_user_auth_code(code, f'{code-uid}', 120)
     data = {
-        'code':  code,
-        'uid': uid
+        'code':  code
     }
     response = client.post(
         '/v1/auth/token',
