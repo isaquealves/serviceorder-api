@@ -1,4 +1,6 @@
-from decouple import config, Csv
+import secrets
+
+from decouple import Csv, config
 
 DATABASES_CONFIG = {
         'default': 'postgres',
@@ -73,6 +75,18 @@ class Development(HardCoded):
         'AUTH_CODE_VALID_UNTIL',
         default=60
     )
+    JWT_LIFETIME_SECONDS = config(
+        "JWT_LIFETIME_SECONDS",
+        3600
+    )
+    JWT_ALGORITHM = config(
+        "JWT_ALGORITHM",
+        "HS256"
+    )
+    JWT_SECRET = config(
+        "JWT_SECRET",
+        secrets.token_urlsafe(128)
+    )
 
 
 class Testing(Development):
@@ -82,6 +96,10 @@ class Testing(Development):
         self.ORATOR_DATABASES['default'] = 'testing'
         self.CELERY_TASK_ALWAYS_EAGER = True
         self.AUTH_CODE_VALID_UNTIL = 30
+        self.JWT_LIFETIME_SECONDS = config(
+            "JWT_LIFETIME_SECONDS",
+            1000
+        )
 
 
 class Production(Development):
