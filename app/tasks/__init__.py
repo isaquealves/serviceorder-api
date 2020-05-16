@@ -5,7 +5,7 @@ from decouple import config
 from python_http_client.exceptions import BadRequestsError, ForbiddenError
 
 from app.helpers import (encode_user_identification, encrypt_data,
-                         generate_auth_code)
+                         generate_auth_code, store_user_auth_code)
 from app.providers.celery import celery
 from app.providers.mail import sg
 
@@ -53,7 +53,7 @@ def send_activation_email(user):
 @celery.task(serializer='pickle')
 def send_authentication_code(user):
     code = generate_auth_code()
-
+    store_user_auth_code(code, f'{code-user.id}', ttl=1800)
     html = f"""<h1 style="color:#474747">Hi, {user.first_name}</h1>
             <p style="color:#474747">Please, use the following code to log into
             Service Orders management</p>
