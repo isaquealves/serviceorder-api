@@ -6,7 +6,7 @@ from app.providers.schema import ma
 from app.providers.celery import celery
 from app.providers.mail import sg
 from app.providers.redis import redis, cache
-
+from app.providers.token import jwt
 from app.models.user import User
 from app.models.observers.user import UserObserver
 
@@ -44,6 +44,7 @@ def create_app(env, config=None):
     sg.init_app(app)
     redis.init_app(app)
     cache.init_app(app, config_prefix="REDIS_CACHE")
+    jwt.init_app(app)
 
     User.observe(UserObserver())
 
