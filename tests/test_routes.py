@@ -10,10 +10,13 @@ from app.helpers import (
     encrypt_data,
     encode_user_identification,
     decrypt,
-    decode_user_identification
+    decode_user_identification,
+    generate_auth_code,
+    store_user_auth_code
 )
 
 pytest.user = None
+pytest.code = None
 
 
 def test_root(client, db):
@@ -121,3 +124,21 @@ def test_auth(client, username, expect):
     result = response.json
 
     assert expect in result['message']  # nosec
+
+
+def test_token_emission(client):
+    code = generate_auth_code()
+    uid = '1'
+    store_user_auth_code(code, f'{code-uid}', 120)
+    data = {
+        'code':  code
+    }
+    response = client.post(
+        '/v1/auth/token',
+        content_type='application/json',
+        json=json.dumps(data)
+    )
+    response_data = response.json.keys()
+    assert all(lambda x: x in response_data for x in ['token', 'refresh'])
+
+
