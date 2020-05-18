@@ -15,3 +15,6 @@ COPY poetry.lock pyproject.toml /app/
 RUN poetry install $(test $APPENV==production && echo "--no-dev") --no-interaction --no-ansi
 
 COPY . /app
+
+ENTRYPOINT ["/app/cli"]
+CMD ["web"]
