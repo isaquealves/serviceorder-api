@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+for arg in "$@"
+do
+    case "$arg" in
+        web)
+            exec gunicorn -b 0.0.0.0:80 autoapp:app
+            ;;
+        web-local)
+            exec flask run -h 0.0.0.0 -p 80
+            ;;
+    esac
+done

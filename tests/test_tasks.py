@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 
 import pytest
@@ -15,9 +14,7 @@ def test_send_activation_email(client):
         }
 
         client.post(
-            "/v1/users",
-            content_type="application/json",
-            json=json.dumps(user_data),
+            "/v1/users", content_type="application/json", json=user_data,
         )
 
         task.assert_called_once()
@@ -28,22 +25,20 @@ def test_send_activation_email(client):
     (
         [config("ACTIVATION_EMAIL_TESTING", "mail@example.com"), 200],
         ["test", 404],
-        ["ἰsaquealves@gmaἰl.com", 404]
+        ["ἰsaquealves@gmaἰl.com", 404],
     ),
 )
 def test_send_authentication_code(client, username, expected_status):
-    with patch("app.api.authentication.send_authentication_code.apply_async") \
-         as task:
+    with patch(
+        "app.api.authentication.send_authentication_code.apply_async"
+    ) as task:
         user_data = {
             "username": username,
         }
         response = client.post(
-            "/v1/auth",
-            content_type="application/json",
-            json=json.dumps(user_data),
+            "/v1/auth", content_type="application/json", json=user_data,
         )
 
         assert response.status_code == expected_status
         if response.status_code == 200:
             task.assert_called_once()
-    

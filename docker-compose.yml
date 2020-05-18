@@ -11,10 +11,16 @@ services:
       - db
     volumes:
       - .:/app
+    ports:
+      - '8000:80'
     env_file:
       - .env
+    environment:
+      FLASK_APP: autoapp.py
     stdin_open: true
     tty: true
+    command: 
+      - web-local
   db:
     image: postgres:12.2-alpine
     ports:
