@@ -33,9 +33,7 @@ def test_users_create(client):
     }
 
     response = client.post(
-        "/v1/users",
-        content_type="application/json",
-        json=json.dumps(user_data),
+        "/v1/users", content_type="application/json", json=user_data,
     )
     result = json.loads(response.json["data"])
 
@@ -45,9 +43,7 @@ def test_users_create(client):
     pytest.user = User.find(result["id"])
     with (pytest.raises(QueryException)) as exc:
         response = client.post(
-            "/v1/users",
-            content_type="application/json",
-            json=json.dumps(user_data),
+            "/v1/users", content_type="application/json", json=user_data,
         )
         assert "UNIQUE constraint failed" in exc.value  # nosec
 
@@ -74,9 +70,7 @@ def test_create_user_invalid_username(
             "email": email,
         }
         response = client.post(
-            "/v1/users",
-            content_type="application/json",
-            json=json.dumps(user_data),
+            "/v1/users", content_type="application/json", json=user_data,
         )
 
         assert response.status_code == expected  # nosec
@@ -110,7 +104,7 @@ def test_account_activation(client):
 def test_auth(client, username, expect):
     data = {"username": username}
     response = client.post(
-        "/v1/auth", content_type="application/json", json=json.dumps(data)
+        "/v1/auth", content_type="application/json", json=data
     )
 
     result = response.json
@@ -124,9 +118,7 @@ def test_token_emission(client):
     store_user_auth_code(code, f"{code}-{uid}", 120)
     data = {"code": code}
     response = client.post(
-        "/v1/auth/token",
-        content_type="application/json",
-        json=json.dumps(data),
+        "/v1/auth/token", content_type="application/json", json=data,
     )
     response_data = response.json.keys()
     assert all(lambda x: x in response_data for x in ["token", "refresh"])
