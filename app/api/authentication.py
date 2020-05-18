@@ -15,15 +15,17 @@ from flask_jwt_extended import (
 
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.ERROR)
+LOGGER.setLevel(logging.INFO)
 
 
 def request(body: Any):
     try:
-        username = json.loads(body)["username"]
-        user = User.where_raw(
-            "username=? or email=?", [username, username]
-        ).first()
+        username = body["username"]
+        user = (
+            User.where("username", "=", username)
+            .or_where("email", "=", username)
+            .first()
+        )
         if user:
             send_authentication_code.apply_async((user,))
             return response_ok(
@@ -39,7 +41,7 @@ def request(body: Any):
 
 def token(body: Any):
     try:
-        code = json.loads(body)["code"].encode()
+        code = body["code"].encode()
         stored_code, userid = redisClient.get(code).decode().split("-")
         user = User.find(userid)
         if not stored_code == code:
